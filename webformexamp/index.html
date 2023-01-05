@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Vertical (basic) form</h2>
+        <form id="proForm" method="post">
+            <div class="form-group">
+                <span><label for="proId">Project-ID:</label> <label id="proIdMsg">
+                    </label></span>
+                <input type="text" class="form-control" name="proId" id="proId" placeholder="Enter Project ID"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="proName">Project-Name:</label>
+                <input type="text" class="form-control" id="proName" placeholder="Enter Project Name" name="empName">
+            </div>
+            <div class="form-group">
+                <label for="assignmedTo">Assigned-To:</label>
+                <input type="text" class="form-control" id="assignmedTo" placeholder="Assignmed-To"
+                    name="assignedTo">
+            </div>
+            <div class="AssignmentDate">
+                <label for="AssignmentDate">AssignmentDate:</label>
+                <input type="text" class="form-control" id="AssignmentDate" placeholder="AssignmentDate"
+                    name="AssignmentDate">
+            </div>
+            <div class="Deadline">
+                <label for="Deadline">Deadline:</label>
+                <input type="text" class="form-control" id="Deadline" placeholder="Deadline" name="Deadline">
+            </div>
+
+            <input type="button" class="btn btn-primary" id="empSave" value="Save" onclick="saveEmployee();">
+            <input type="button" class="btn btn-primary" id="empReset" value="Reset" onclick="resetForm(); ">
+            <input type="button" class="btn btn-primary" id="empDelete" value="Update" onclick="updateEmployee();">
+        </form>
+    </div>
+    <script>
+        // make project id as primary key and If the primary key value does NOT exist in the database, enable [Save] and [Reset] buttons and move the cursor to the next field and allow the user to enter data in the form
+        // If the primary key value exists in the database, enable [Update] and [Reset] buttons and move the cursor to the next field and allow the user to enter data in the form
+        // If the primary key value exists in the database, enable [Delete] and [Reset] buttons and move the cursor to the next field and allow the user to enter data in the form
+
+          $("#proId").focus();
+        function validateAndGetFormData() {
+            var proId = $("#proId").val();
+            var proName = $("#proName").val();
+            var assignedTo = $("#assignedTo").val();
+            var AssignmentDate = $("#AssignmentDate").val();
+            var Deadline = $("#Deadline").val();
+            if (proId === "") {
+                $("#proIdMsg").html("Please enter Project ID");
+                $("#proId").focus();
+                return "";
+            }
+            var jsonObj = "{\n"
+                + "\"proId\" : \"" + proId + "\",\n"
+                + "\"proName\" : \"" + proName + "\",\n"
+                + "\"assignedTo\" : \"" + assignedTo + "\",\n"
+                + "\"AssignmentDate\" : \"" + AssignmentDate + "\",\n"
+                + "\"Deadline\" : \"" + Deadline + "\"\n"
+                + "}";
+            return jsonObj;
+        }
+        
+        // This method is used to create PUT Json request.
+       function createPUTRequest(sessionId, dataJsonStr, dbName, tableName) {
+            var putReqStr = "{\n"
+                + "\"sessionId\" : \"" + sessionId + "\",\n"
+                + "\"dbName\" : \"" + dbName + "\",\n"
+                + "\"tableName\" : \"" + tableName + "\",\n"
+                + "\"data\" : " + dataJsonStr + "\n"
+                + "}";
+            return putReqStr;
+        }
+        // This method is used to execute the command.
+        function executeCommand(command, host, path) {
+            var resultObj = "";
+            var url = host + path;
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: command,
+                contentType: "application/json",
+                dataType: "json",
+                success: function (result) {
+                    resultObj = result;
+                },
+                error: function (xhr, status, error) {
+                    alert("Error: " + error.message);
+                }
+            });
+            return resultObj;
+        }
+        
+
+        // This method is used to reset the form.
+        function resetForm() {
+            $("#proId").val("");
+            $("#proName").val("");
+            $("#assignedTo").val("");
+            $("#AssignmentDate").val("");
+            $("#Deadline").val("");
+            $("#proIdMsg").html("");
+            $("#proId").focus();
+        }
+        // This method is used to save the employee.
+        function saveEmployee() {
+            var jsonStr = validateAndGetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+            var putReqStr = createPUTRequest("90938164|-31949273033634356|90955222",
+                jsonStr, "PRO", "PRO-REL");
+            alert(putReqStr);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommand(putReqStr,
+                "http://api.login2explore.com:5577", "/api/iml");
+            alert(JSON.stringify(resultObj));
+            jQuery.ajaxSetup({ async: true });
+            resetForm();
+        }
+    </script>
+</body>
+
+</html>
